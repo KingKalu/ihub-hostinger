@@ -1,0 +1,57 @@
+touch filename : to create a file
+cp filename newname
+rm -rf node_modules
+
+cd /etc/nginx/sites-available
+cd /var/www/
+ln -s ../sites-available/
+
+sudo certbot certificates
+sudo certbot delete --cert-name ipanelcloud.info
+
+ls -l /var/www/ipanel/ihub-connect-ipanel-frontend/build/
+
+sudo tail -f /var/log/nginx/error.log
+
+ssh root@191.101.14.177
+ssh root@178.16.140.193
+
+systemctl restart nginx
+
+sudo nginx -t
+
+pm2 start npm --name "ihub-prod" -- start
+pm2 start npm --name "ihub-beta" -- start
+pm2 start npm --name "ihub-qa" -- start
+pm2 start npm --name "multitenant" -- start
+pm2 start npm --name "ipanel" -- start
+
+pm2 restart qa --update-env
+pm2 restart ihub-beta --update-env
+pm2 restart prod --update-env
+pm2 restart ahava --update-env
+pm2 restart ipanel --update-env
+
+pm2 log qa
+git pull origin 'branch name'
+cd /var/www/ihub-beta/ihub-connect-backend/
+
+sudo certbot --nginx -d app.ipanelcloud.info -d www.app.ipanelcloud.info
+
+sudo certbot --nginx -d api.izone5.io -d www.api.izone5.io
+
+sudo certbot certonly --manual --preferred-challenges=dns --server https://acme-v02.api.letsencrypt.org/directory -d "*.izone5.info" -d "izone5.info"
+
+STEP TO DEPLOY BACKEND
+
+1. access the vps using ssh root@191.101.14.177 for qa and beta or ssh root@178.16.140.193 for production and ahava
+2. cd /var/www/ihub-qa/ihubconnect-backend
+3. git switch qa
+4. git pull
+5. git switch -c new branchname
+6. pm2 restart qa --update-env
+
+repeat STEPs
+pm2 restart ihub-beta --update-env
+pm2 restart prod --update-env
+pm2 restart ahava --update-env
